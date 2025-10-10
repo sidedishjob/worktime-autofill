@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         作業時間 平日デフォルト入力
 // @namespace    sidedishjob
-// @version      1.0.0
+// @version      1.0.1
 // @description  平日・未入力の日に 08:15-17:15/休憩00:45 を自動投入
 // @match        https://platform.levtech.jp/p/workreport/input/*
 // @updateURL    https://raw.githubusercontent.com/sidedishjob/worktime-autofill/main/autofill.user.js
