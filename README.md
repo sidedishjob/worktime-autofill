@@ -12,9 +12,9 @@
 ## 🧩 導入手順
 
 1. Chrome/Edge に [Tampermonkey](https://www.tampermonkey.net/) をインストール
-2. 右記 URL を開く(https://raw.githubusercontent.com/iwastudio/worktime-autofill/main/autofill.user.js)
+2. 右記 URL を開く(https://raw.githubusercontent.com/sidedishjob/worktime-autofill/main/autofill.user.js)
 3. 「インストール」をクリック
-4. 対象ページ（例：Levatech の作業報告画面）を開くと自動で入力されます。
+4. 対象ページ（例：Levatech の作業報告書修正画面）を開くと自動で入力されます。
 
 ## ⚙️ カスタマイズ
 

@@ -3,7 +3,7 @@
 // @namespace    sidedishjob
 // @version      1.0.0
 // @description  平日・未入力の日に 08:15-17:15/休憩00:45 を自動投入
-// @match        https://platform.levtech.jp/*
+// @match        https://platform.levtech.jp/p/workreport/input/*
 // @updateURL    https://raw.githubusercontent.com/sidedishjob/worktime-autofill/main/autofill.user.js
 // @downloadURL  https://raw.githubusercontent.com/sidedishjob/worktime-autofill/main/autofill.user.js
 // @run-at       document-idle
