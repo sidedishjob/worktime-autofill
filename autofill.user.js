@@ -144,9 +144,14 @@
       // 土日：従来どおりスキップ
       if (stat.isWeekend) return;
 
+      // 作業内容に「休暇」が含まれている場合：時刻入力をスキップ
+      const workInput = tr.querySelector(WORK_CONTENT_SELECTOR);
+      if (workInput && workInput.value && workInput.value.includes("休暇")) {
+        return;
+      }
+
       // 平日の祝日：作業内容に "祝日_名称" を入れて、時刻入力はスキップ
       if (stat.isWeekdayHoliday) {
-        const workInput = tr.querySelector(WORK_CONTENT_SELECTOR);
         if (workInput) {
           workInput.value = `祝日_${stat.holidayName}`;
           workInput.dispatchEvent(new Event("input", { bubbles: true }));
