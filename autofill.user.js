@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         作業時間 平日デフォルト入力（手動トリガー対応）
 // @namespace    sidedishjob
-// @version      1.1.0
+// @version      1.2.0
 // @description  平日・未入力の日に 08:15-17:15/休憩00:45 をボタン/ショートカットで投入（オプションで自動）
 // @match        https://platform.levtech.jp/p/workreport/input/*
 // @updateURL    https://raw.githubusercontent.com/sidedishjob/worktime-autofill/main/autofill.user.js
@@ -15,7 +15,7 @@
   /** -------------------------------------------
    * 設定
    * ------------------------------------------- */
-  // 既定の標準時間（ダイアログで上書き保存可）
+  // 既定の標準時間
   const STANDARD = {
     start: "08:15",
     end: "17:15",
@@ -23,6 +23,74 @@
   };
 
   const AUTO_ON_LOAD = false; // ← trueで従来どおり自動投入/falseで手動（ボタン・ショートカット）
+
+  /** -------------------------------------------
+   * 定数定義
+   * ------------------------------------------- */
+  const API_URL = "https://holidays-jp.github.io/api/v1/date.json";
+  const WORK_CONTENT_SELECTOR =
+    'input[name^="data[DailyReport]"][name$="[work_content]"]'; // 作業内容入力欄のセレクタ
+
+  /*************************************************
+   * 共通ユーティリティ
+   *************************************************/
+
+  /**
+   * 行から "YYYY-MM-DD" を取得（作業内容 input の name を解析）
+   * name 例: data[DailyReport][20251001][work_content]
+   */
+  function extractDateStrFromRow(tr) {
+    const input = tr.querySelector(WORK_CONTENT_SELECTOR);
+    if (!input) return null;
+    const name = input.getAttribute("name") || "";
+    const m = name.match(/data\[DailyReport\]\[(\d{8})\]\[work_content\]/);
+    if (!m) return null;
+    const y = m[1].slice(0, 4);
+    const mo = m[1].slice(4, 6);
+    const d = m[1].slice(6, 8);
+    return `${y}-${mo}-${d}`;
+  }
+
+  /** 行配列から最初の年月 "YYYY-MM" を推定（ログ用） */
+  function guessYmFromRows(rows) {
+    for (const tr of rows) {
+      const dateStr = extractDateStrFromRow(tr);
+      if (dateStr) return dateStr.slice(0, 7);
+    }
+    return null;
+  }
+
+  /** 祝日APIを取得（全量）。Map<'YYYY-MM-DD','祝日名'> を返す。失敗時は alert + 例外 */
+  async function fetchHolidayMap() {
+    const res = await fetch(API_URL, { cache: "no-store" });
+    if (!res.ok) {
+      alert("祝日APIの取得に失敗しました。時間をおいて再実行してください。");
+      throw new Error(`holiday api http ${res.status}`);
+    }
+    const all = await res.json(); // { 'YYYY-MM-DD': '祝日名', ... }
+    const map = new Map(Object.entries(all));
+    return map;
+  }
+
+  /** 平日かつ祝日か/週末かを判定 */
+  function isHolidayOrWeekend(dateStr, holidayMap) {
+    if (!dateStr) return { isWeekend: false, isWeekdayHoliday: false };
+    const d = new Date(dateStr);
+    const day = d.getDay(); // 0:日, 6:土
+    const isWeekend = day === 0 || day === 6;
+
+    if (isWeekend) {
+      return { isWeekend: true, isWeekdayHoliday: false };
+    }
+    if (holidayMap.has(dateStr)) {
+      return {
+        isWeekend: false,
+        isWeekdayHoliday: true,
+        holidayName: holidayMap.get(dateStr),
+      };
+    }
+    return { isWeekend: false, isWeekdayHoliday: false };
+  }
 
   /** -------------------------------------------
    * 以下、ロジック部
@@ -35,18 +103,60 @@
    * 本体：一覧に標準時間を投入
    *  force=false: 未入力のみ
    *  force=true : 既入力も上書き
+   * ※ 祝日対応：平日の祝日はスキップし、作業内容に "祝日_名称" を入れる
    * ------------------------------------------- */
-  function fillAll(force = false) {
+  async function fillAll(force = false) {
     const rows = Array.from(document.querySelectorAll("table tr")).filter(
       (tr) =>
         tr.querySelector('input[ref="start_time"],input[name*="[start_time]"]')
     );
 
+    if (rows.length === 0) {
+      console.log("[worktime-autofill] 対象行が見つかりませんでした。");
+      return;
+    }
+
+    // 祝日マップ取得（失敗ならここで中断）
+    let holidayMap;
+    try {
+      holidayMap = await fetchHolidayMap();
+    } catch {
+      return;
+    }
+
+    // ログ用に対象年月を推定（行から抽出）
+    const ym = guessYmFromRows(rows);
+    if (ym) {
+      // 当月に該当する件数だけを数えて表示（厳密には全量から startsWith で絞る）
+      let cnt = 0;
+      for (const d of holidayMap.keys()) {
+        if (d.startsWith(`${ym}-`)) cnt++;
+      }
+      console.info(`API取得成功 ${ym}: ${cnt}件`);
+    } else {
+      console.info("API取得成功（年月不明）");
+    }
+
     let count = 0;
 
     rows.forEach((tr) => {
-      const dayLabel = tr.querySelector("td")?.textContent || "";
-      if (isWeekendLabel(dayLabel)) return;
+      const dateStr = extractDateStrFromRow(tr);
+      const stat = isHolidayOrWeekend(dateStr, holidayMap);
+
+      // 土日：従来どおりスキップ
+      if (stat.isWeekend) return;
+
+      // 平日の祝日：作業内容に "祝日_名称" を入れて、時刻入力はスキップ
+      if (stat.isWeekdayHoliday) {
+        const workInput = tr.querySelector(WORK_CONTENT_SELECTOR);
+        if (workInput) {
+          workInput.value = `祝日_${stat.holidayName}`;
+          workInput.dispatchEvent(new Event("input", { bubbles: true }));
+          workInput.dispatchEvent(new Event("change", { bubbles: true }));
+          workInput.dispatchEvent(new Event("blur", { bubbles: true }));
+        }
+        return;
+      }
 
       const startInput = tr.querySelector(
         'input[ref="start_time"], input[name*="[start_time]"]'
@@ -125,8 +235,8 @@
       return btn;
     };
 
-    mkBtn("初期値入力", () => fillAll(false));
-    mkBtn("初期値入力(上書き)", () => fillAll(true));
+    mkBtn("初期値入力", async () => await fillAll(false));
+    mkBtn("初期値入力(上書き)", async () => await fillAll(true));
   }
 
   function createFloatingToolbar() {
