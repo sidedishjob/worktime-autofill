@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         作業時間 平日デフォルト入力（手動トリガー対応）
+// @name         作業時間 平日デフォルト入力（祝日・休暇対応）
 // @namespace    sidedishjob
-// @version      1.2.0
-// @description  平日・未入力の日に 08:15-17:15/休憩00:45 をボタン/ショートカットで投入（オプションで自動）
+// @version      1.3.0
+// @description  平日・未入力の日に 08:15-17:15 / 休憩00:45 を自動または手動で入力（祝日・休暇行はスキップ）
 // @match        https://platform.levtech.jp/p/workreport/input/*
 // @updateURL    https://raw.githubusercontent.com/sidedishjob/worktime-autofill/main/autofill.user.js
 // @downloadURL  https://raw.githubusercontent.com/sidedishjob/worktime-autofill/main/autofill.user.js
@@ -144,9 +144,14 @@
       // 土日：従来どおりスキップ
       if (stat.isWeekend) return;
 
+      // 作業内容に「休暇」が含まれている場合：時刻入力をスキップ
+      const workInput = tr.querySelector(WORK_CONTENT_SELECTOR);
+      if (workInput && workInput.value && workInput.value.includes("休暇")) {
+        return;
+      }
+
       // 平日の祝日：作業内容に "祝日_名称" を入れて、時刻入力はスキップ
       if (stat.isWeekdayHoliday) {
-        const workInput = tr.querySelector(WORK_CONTENT_SELECTOR);
         if (workInput) {
           workInput.value = `祝日_${stat.holidayName}`;
           workInput.dispatchEvent(new Event("input", { bubbles: true }));
