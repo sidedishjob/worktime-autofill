@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         作業時間 平日デフォルト入力（手動トリガー対応）
+// @name         作業時間 平日デフォルト入力（祝日・休暇対応）
 // @namespace    sidedishjob
-// @version      1.2.0
-// @description  平日・未入力の日に 08:15-17:15/休憩00:45 をボタン/ショートカットで投入（オプションで自動）
+// @version      1.3.0
+// @description  平日・未入力の日に 08:15-17:15 / 休憩00:45 を自動または手動で入力（祝日・休暇行はスキップ）
 // @match        https://platform.levtech.jp/p/workreport/input/*
 // @updateURL    https://raw.githubusercontent.com/sidedishjob/worktime-autofill/main/autofill.user.js
 // @downloadURL  https://raw.githubusercontent.com/sidedishjob/worktime-autofill/main/autofill.user.js
