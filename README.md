@@ -2,7 +2,7 @@
 
 平日の空欄に「08:45〜17:15 / 休憩 00:45」を自動または手動で入力できる Tampermonkey スクリプト。
 
-## 💡 機能
+## 機能
 
 - **初期値入力ボタン**による手動トリガー対応
 - **Alt+I** で未入力セルへ一括入力、**Alt+Shift+I** で全行上書き
@@ -13,16 +13,19 @@
 - それ以外の場合は `blur` / `change` イベントで確定
 - オプションでページ読み込み時の**自動入力モード**も切り替え可能（`AUTO_ON_LOAD`）
 
-## 🧩 導入手順
+## 導入手順
 
 1. Chrome/Edge に [Tampermonkey](https://www.tampermonkey.net/) をインストール
 2. 下記 URL を開く  
    👉 [https://raw.githubusercontent.com/sidedishjob/worktime-autofill/main/autofill.user.js](https://raw.githubusercontent.com/sidedishjob/worktime-autofill/main/autofill.user.js)
 3. 「インストール」をクリック
-4. 対象ページ（例：Levtech の作業報告書入力画面）を開く
-5. 右上の「初期値入力」ボタン、または **Alt+I** で入力を実行
+4. Chrome/Edge の「ユーザースクリプトを許可する」をONにする
+   Chrome/Edge のTampermonkeyアイコンを右クリック→「拡張機能を管理」から設定する
+5. Chrome/Edge を再起動する
+6. 対象ページ（例：Levtech の作業報告書入力画面）を開く
+7. 右上の「初期値入力」ボタン、または **Alt+I** で入力を実行
 
-## ⚙️ カスタマイズ
+## カスタマイズ
 
 ```js
 // 定時を変更したい場合はこの定数を修正
