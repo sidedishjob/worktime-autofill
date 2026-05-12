@@ -184,181 +184,157 @@
     * { box-sizing: border-box; }
 
     .panel {
+      --bg: hsl(240 10% 3.9%);
+      --fg: hsl(0 0% 98%);
+      --muted: hsl(240 5% 64.9%);
+      --border: hsl(240 3.7% 15.9%);
+      --accent: hsl(240 3.7% 15.9%);
+      --accent-hover: hsl(240 4% 19%);
+      --primary: hsl(0 0% 98%);
+      --primary-fg: hsl(240 5.9% 10%);
+      --ring: hsl(240 4.9% 83.9%);
+
       position: fixed;
-      width: 252px;
-      padding: 12px 14px 12px;
-      background: #14171d;
-      color: #f4f6fa;
+      width: 256px;
+      padding: 14px;
+      background: var(--bg);
+      color: var(--fg);
       font-family:
-        ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-        "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
-      font-size: 12px;
+        "Geist", "Inter", ui-sans-serif, system-ui, -apple-system,
+        BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo",
+        sans-serif;
+      font-size: 13px;
       line-height: 1.45;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.10);
+      letter-spacing: -0.005em;
+      border-radius: 10px;
+      border: 1px solid var(--border);
       box-shadow:
-        0 24px 60px -22px rgba(0,0,0,0.65),
-        0 10px 24px -10px rgba(0,0,0,0.45),
-        inset 0 1px 0 rgba(255,255,255,0.06);
+        0 10px 30px -12px rgba(0,0,0,0.55),
+        0 4px 10px -4px rgba(0,0,0,0.35);
       pointer-events: auto;
       user-select: none;
-      opacity: 0.96;
-      transform-origin: bottom right;
-      transition: opacity 220ms ease;
-      animation: wa-enter 480ms cubic-bezier(.2,.7,.25,1) both;
-      overflow: hidden;
-    }
-    .panel:hover { opacity: 1; }
-
-    .panel::before {
-      content: "";
-      position: absolute;
-      top: 10px; bottom: 10px; left: 0;
-      width: 2px;
-      border-radius: 2px;
-      background: linear-gradient(180deg, #7fe7d5 0%, #5a9bff 100%);
-      opacity: 1;
-    }
-    .panel::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(120% 80% at 100% 0%, rgba(127,231,213,0.06) 0%, transparent 55%),
-        radial-gradient(80% 60% at 0% 100%, rgba(90,155,255,0.05) 0%, transparent 55%);
+      transition: opacity 180ms ease;
+      animation: wa-enter 320ms cubic-bezier(.2,.7,.25,1) both;
     }
 
     .brand {
-      position: relative;
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 11px;
-      padding: 2px 0 2px 2px;
+      margin-bottom: 12px;
+      padding: 1px 0;
       cursor: grab;
       touch-action: none;
     }
     .brand.is-dragging { cursor: grabbing; }
-    .brand-grip {
-      width: 8px;
-      height: 12px;
-      flex: 0 0 auto;
-      background-image:
-        radial-gradient(circle, rgba(255,255,255,0.45) 1px, transparent 1.4px);
-      background-size: 4px 4px;
-      background-position: 0 0;
-      background-repeat: repeat;
-      opacity: 0.55;
-      transition: opacity 140ms ease;
-    }
-    .brand:hover .brand-grip { opacity: 0.9; }
     .brand-dot {
-      width: 6px; height: 6px;
+      width: 7px; height: 7px;
       border-radius: 50%;
-      background: #7fe7d5;
-      box-shadow: 0 0 8px rgba(127,231,213,0.7);
+      background: hsl(142 71% 45%);
       flex: 0 0 auto;
+      transition: background 160ms ease;
     }
     .brand-text {
-      font-family:
-        ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
-      font-size: 10.5px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.86);
+      font-size: 12.5px;
       font-weight: 500;
+      color: var(--fg);
+      letter-spacing: -0.01em;
     }
 
     .actions {
-      position: relative;
       display: grid;
       gap: 6px;
     }
     .btn {
       appearance: none;
       -webkit-appearance: none;
-      background: rgba(255,255,255,0.06);
-      color: #ffffff;
-      border: 1px solid rgba(255,255,255,0.14);
       font: inherit;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 500;
-      padding: 9px 11px 9px 12px;
-      border-radius: 7px;
+      height: 32px;
+      padding: 0 10px 0 12px;
+      border-radius: 6px;
       cursor: pointer;
       display: grid;
       grid-template-columns: 1fr auto;
       align-items: center;
       gap: 10px;
       transition:
-        background 140ms ease,
+        background-color 140ms ease,
         border-color 140ms ease,
-        transform 140ms ease;
+        color 140ms ease;
     }
-    .btn:hover {
-      background: rgba(255,255,255,0.11);
-      border-color: rgba(255,255,255,0.24);
-    }
-    .btn:active { transform: scale(0.985); }
     .btn:focus-visible {
       outline: none;
-      border-color: rgba(127,231,213,0.65);
-      box-shadow: 0 0 0 2px rgba(127,231,213,0.22);
+      box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--ring);
     }
+
     .btn--primary {
-      background:
-        linear-gradient(180deg, rgba(127,231,213,0.28) 0%, rgba(90,155,255,0.16) 100%),
-        rgba(255,255,255,0.02);
-      border-color: rgba(127,231,213,0.45);
-      color: #ffffff;
+      background: var(--primary);
+      color: var(--primary-fg);
+      border: 1px solid var(--primary);
     }
-    .btn--primary:hover {
-      background:
-        linear-gradient(180deg, rgba(127,231,213,0.36) 0%, rgba(90,155,255,0.22) 100%),
-        rgba(255,255,255,0.02);
-      border-color: rgba(127,231,213,0.60);
+    .btn--primary:hover { background: hsl(0 0% 92%); }
+
+    .btn--secondary {
+      background: transparent;
+      color: var(--fg);
+      border: 1px solid var(--border);
     }
+    .btn--secondary:hover {
+      background: var(--accent);
+      border-color: var(--accent-hover);
+    }
+
     .btn__label { text-align: left; }
+
     .kbd {
+      display: inline-flex;
+      align-items: center;
+      height: 18px;
+      padding: 0 5px;
       font-family:
-        ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
-      font-size: 10.5px;
-      color: rgba(255,255,255,0.82);
-      background: rgba(0,0,0,0.38);
-      padding: 2px 6px;
+        "Geist Mono", ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo,
+        Consolas, monospace;
+      font-size: 10px;
+      font-weight: 500;
       border-radius: 4px;
-      border: 1px solid rgba(255,255,255,0.10);
-      letter-spacing: 0.04em;
+      border: 1px solid var(--border);
+      background: hsl(240 5% 10%);
+      color: var(--muted);
       white-space: nowrap;
+    }
+    .btn--primary .kbd {
+      background: hsl(0 0% 88%);
+      border-color: hsl(0 0% 80%);
+      color: hsl(240 5% 35%);
     }
 
     .foot {
-      position: relative;
-      margin-top: 11px;
+      margin-top: 12px;
       padding-top: 10px;
-      border-top: 1px solid rgba(255,255,255,0.10);
-      font-size: 11px;
-      color: rgba(255,255,255,0.62);
-      letter-spacing: 0.02em;
+      border-top: 1px solid var(--border);
+      font-size: 11.5px;
+      color: var(--muted);
       min-height: 14px;
-      transition: color 220ms ease;
+      transition: color 180ms ease;
     }
-    .foot[data-tone="ok"]  { color: #7fe7d5; }
-    .foot[data-tone="err"] { color: #ff8a8a; }
+    .foot[data-tone="ok"]  { color: hsl(142 71% 55%); }
+    .foot[data-tone="err"] { color: hsl(0 72% 65%); }
 
     .panel[data-busy="true"] .brand-dot {
-      animation: wa-pulse 800ms ease-in-out infinite;
+      background: hsl(38 92% 55%);
+      animation: wa-pulse 900ms ease-in-out infinite;
     }
-    .panel[data-busy="true"] .btn { pointer-events: none; opacity: 0.85; }
+    .panel[data-busy="true"] .btn { pointer-events: none; opacity: 0.7; }
 
     @keyframes wa-enter {
-      from { opacity: 0; transform: translateY(8px) scale(0.985); }
-      to   { opacity: 0.96; transform: translateY(0) scale(1); }
+      from { opacity: 0; transform: translateY(6px) scale(0.99); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
     }
     @keyframes wa-pulse {
-      0%, 100% { opacity: 1;   box-shadow: 0 0 8px rgba(127,231,213,0.7); }
-      50%      { opacity: 0.4; box-shadow: 0 0 2px rgba(127,231,213,0.30); }
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0.4; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -369,16 +345,15 @@
   const PANEL_HTML = `
     <div class="panel" data-busy="false">
       <div class="brand" title="ドラッグで移動">
-        <span class="brand-grip" aria-hidden="true"></span>
         <span class="brand-dot"></span>
-        <span class="brand-text">worktime · autofill</span>
+        <span class="brand-text">worktime-autofill</span>
       </div>
       <div class="actions">
         <button class="btn btn--primary" type="button" data-action="fill">
           <span class="btn__label">未入力を埋める</span>
           <span class="kbd">⌥ I</span>
         </button>
-        <button class="btn" type="button" data-action="overwrite">
+        <button class="btn btn--secondary" type="button" data-action="overwrite">
           <span class="btn__label">全行を上書き</span>
           <span class="kbd">⌥ ⇧ I</span>
         </button>
