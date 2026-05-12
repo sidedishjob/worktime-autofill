@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">worktime-autofill icon</title>
+  <desc id="desc">A rounded teal calendar with a clock and completion check mark.</desc>
+  <defs>
+    <linearGradient id="bg" x1="18" y1="10" x2="112" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#159A8C"/>
+      <stop offset="1" stop-color="#1D5E8C"/>
+    </linearGradient>
+    <linearGradient id="page" x1="31" y1="30" x2="96" y2="103" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EAF4F2"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
+  <rect x="28" y="30" width="72" height="76" rx="12" fill="url(#page)"/>
+  <rect x="28" y="30" width="72" height="20" rx="12" fill="#F7C948"/>
+  <path d="M28 42h72v8H28z" fill="#F7C948"/>
+  <rect x="42" y="19" width="10" height="24" rx="5" fill="#12636E"/>
+  <rect x="76" y="19" width="10" height="24" rx="5" fill="#12636E"/>
+  <path d="M43 66h20M43 80h16M43 94h12" stroke="#7A8E92" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="82" cy="82" r="27" fill="#0F3442"/>
+  <circle cx="82" cy="82" r="20" fill="#FFFFFF"/>
+  <path d="M82 70v13l10 6" stroke="#159A8C" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M68 95l10 10 23-28" fill="none" stroke="#F7C948" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

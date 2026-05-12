@@ -1,6 +1,6 @@
 # worktime-autofill
 
-平日の空欄に「08:45〜17:15 / 休憩 00:45」を自動または手動で入力できる Tampermonkey スクリプト。
+Levtech の作業報告書入力画面で、平日の空欄に「08:45〜17:15 / 休憩 00:45」を自動または手動で入力する Chrome 拡張機能。
 
 ## 機能
 
@@ -11,30 +11,36 @@
 - **作業内容に「休暇」を含む行は自動入力をスキップ**
 - ページ側の計算関数 (`reflect_times`) が存在すれば自動反映
 - それ以外の場合は `blur` / `change` イベントで確定
-- オプションでページ読み込み時の**自動入力モード**も切り替え可能（`AUTO_ON_LOAD`）
+- 拡張機能のオプション画面で **始業/終業/休憩時間** と **ページ読込時の自動入力 ON/OFF** を変更可能
 
-## 導入手順
+## 導入手順（ローカル開発者モード）
 
-1. Chrome/Edge に [Tampermonkey](https://www.tampermonkey.net/) をインストール
-2. 下記 URL を開く  
-   👉 [https://raw.githubusercontent.com/sidedishjob/worktime-autofill/main/autofill.user.js](https://raw.githubusercontent.com/sidedishjob/worktime-autofill/main/autofill.user.js)
-3. 「インストール」をクリック
-4. Chrome/Edge の「ユーザースクリプトを許可する」をONにする
-   Chrome/Edge のTampermonkeyアイコンを右クリック→「拡張機能を管理」から設定する
-5. Chrome/Edge を再起動する
-6. 対象ページ（例：Levtech の作業報告書入力画面）を開く
-7. 右上の「初期値入力」ボタン、または **Alt+I** で入力を実行
+1. このリポジトリをローカルにクローン
+   ```sh
+   git clone https://github.com/sidedishjob/worktime-autofill.git
+   ```
+2. Chrome / Edge で `chrome://extensions` を開く
+3. 右上の「**デベロッパーモード**」をオン
+4. 「**パッケージ化されていない拡張機能を読み込む**」をクリックし、クローンした `worktime-autofill` ディレクトリを選択
+5. 対象ページ（Levtech の作業報告書入力画面）を開く
+6. 右上の「初期値入力」ボタン、または **Alt+I** で入力を実行
 
-## カスタマイズ
+## 設定の変更
 
-```js
-// 定時を変更したい場合はこの定数を修正
-const STANDARD = {
-  start: "08:45",
-  end: "17:15",
-  break: "00:45",
-};
+`chrome://extensions` で本拡張機能カードの「**詳細**」→「**拡張機能のオプション**」を開く。
 
-// ページ読み込み時に自動入力したい場合は true に変更
-const AUTO_ON_LOAD = false;
-```
+| 項目                       | 既定値  | 説明                                                      |
+| -------------------------- | ------- | --------------------------------------------------------- |
+| 始業時刻                   | `08:45` | `HH:MM` 形式で入力                                        |
+| 終業時刻                   | `17:15` | `HH:MM` 形式で入力                                        |
+| 休憩時間                   | `00:45` | `HH:MM` 形式で入力                                        |
+| ページ読込時に自動入力する | OFF     | ON にすると対象ページを開いた瞬間に未入力欄を自動で埋める |
+
+設定変更後は対象ページをリロードすると反映される。
+
+## ショートカット
+
+| キー              | 動作                     |
+| ----------------- | ------------------------ |
+| `Alt + I`         | 未入力セルに初期値を入力 |
+| `Alt + Shift + I` | 全行を強制的に上書き入力 |

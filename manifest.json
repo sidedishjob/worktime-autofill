@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "worktime-autofill",
+  "version": "2.0.0",
+  "description": "Levtech 作業報告書の平日に定時を自動/手動入力 (祝日・休暇対応)",
+  "permissions": ["storage"],
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "32": "assets/icons/icon32.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "assets/icons/icon16.png",
+      "32": "assets/icons/icon32.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://platform.levtech.jp/p/workreport/input/*"],
+      "js": ["src/bridge.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://platform.levtech.jp/p/workreport/input/*"],
+      "js": ["src/content.js"],
+      "world": "MAIN",
+      "run_at": "document_idle"
+    }
+  ],
+  "options_ui": {
+    "page": "src/options.html",
+    "open_in_tab": false
+  }
+}

@@ -5,6 +5,22 @@
 ```markdown
 # Changelog
 
+## [2.0.0] - 2026-05-12
+
+### Changed
+
+- Tampermonkey ユーザースクリプトから **Chrome 拡張機能 (Manifest V3)** に移行
+- 配布は `chrome://extensions` の「パッケージ化されていない拡張機能を読み込む」によるローカル導入方式に変更
+
+### Added
+
+- 拡張機能のオプション画面を追加（始業/終業/休憩時間、ページ読込時の自動入力 ON/OFF を変更可能）
+- 設定は `chrome.storage.sync` に保存され、ブラウザ間で同期される
+
+### Removed
+
+- `autofill.user.js`（Tampermonkey 版スクリプト）を削除
+
 ## [1.0.0] - 2025-10-10
 
 ### Added
