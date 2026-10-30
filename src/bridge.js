@@ -2,9 +2,10 @@
   "use strict";
 
   const DEFAULTS = Object.freeze({
-    standardStart: "08:45",
-    standardEnd: "17:15",
+    standardStart: "08:50",
+    standardEnd: "17:20",
     standardBreak: "00:45",
+    standardComment: "結合テスト",
     autoOnLoad: false,
     panelTop: null,
     panelLeft: null,

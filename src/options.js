@@ -9,6 +9,7 @@
     standardStart: $("standardStart"),
     standardEnd: $("standardEnd"),
     standardBreak: $("standardBreak"),
+    standardComment: $("standardComment"),
     autoOnLoad: $("autoOnLoad"),
   };
   const statusEl = $("status");
@@ -27,6 +28,7 @@
       inputs.standardStart.value = stored.standardStart;
       inputs.standardEnd.value = stored.standardEnd;
       inputs.standardBreak.value = stored.standardBreak;
+      inputs.standardComment.value = stored.standardComment;
       inputs.autoOnLoad.checked = !!stored.autoOnLoad;
     });
   };
@@ -44,7 +46,11 @@
     }
     return {
       ok: true,
-      values: { ...values, autoOnLoad: inputs.autoOnLoad.checked },
+      values: {
+        ...values,
+        standardComment: inputs.standardComment.value.trim(),
+        autoOnLoad: inputs.autoOnLoad.checked,
+      },
     };
   };
 

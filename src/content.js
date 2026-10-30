@@ -2,9 +2,10 @@
   "use strict";
 
   const DEFAULTS = Object.freeze({
-    standardStart: "08:45",
-    standardEnd: "17:15",
+    standardStart: "08:50",
+    standardEnd: "17:20",
     standardBreak: "00:45",
+    standardComment: "結合テスト",
     autoOnLoad: false,
     panelTop: null,
     panelLeft: null,
@@ -17,27 +18,68 @@
   });
 
   const API_URL = "https://holidays-jp.github.io/api/v1/date.json";
-  const WORK_CONTENT_SELECTOR =
-    'input[name^="data[DailyReport]"][name$="[work_content]"]';
+  const START_SELECTOR = 'input[name^="rows."][name$=".startTime"]';
+  const TERM_SELECTOR = 'dl[data-field="workReportTerm"] dd';
 
   let currentConfig = { ...DEFAULTS };
   let initialized = false;
 
-  function extractDateStrFromRow(tr) {
-    const input = tr.querySelector(WORK_CONTENT_SELECTOR);
-    if (!input) return null;
-    const name = input.getAttribute("name") || "";
-    const m = name.match(/data\[DailyReport\]\[(\d{8})\]\[work_content\]/);
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const toDateStr = (d) =>
+    `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+
+  // 「対象期間」の開始日 (例: 2026/10/01 ～ 2026/10/31)
+  function getTermStart() {
+    const text = document.querySelector(TERM_SELECTOR)?.textContent || "";
+    const m = text.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);
     if (!m) return null;
-    const y = m[1].slice(0, 4);
-    const mo = m[1].slice(4, 6);
-    const d = m[1].slice(6, 8);
-    return `${y}-${mo}-${d}`;
+    return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
   }
 
-  function guessYmFromRows(rows) {
+  function getRowIndex(tr) {
+    const name = tr.querySelector(START_SELECTOR)?.getAttribute("name") || "";
+    const m = name.match(/^rows\.(\d+)\.startTime$/);
+    return m ? Number(m[1]) : null;
+  }
+
+  // rows.N は対象期間開始日から N 日目。取得できなければ行ラベル (10/01（木）) から推定
+  function extractDateStrFromRow(tr, termStart) {
+    const index = getRowIndex(tr);
+    if (termStart && index !== null) {
+      const d = new Date(termStart);
+      d.setDate(d.getDate() + index);
+      return toDateStr(d);
+    }
+    const label = tr.querySelector("td")?.textContent || "";
+    const m = label.match(/(\d{1,2})\/(\d{1,2})/);
+    if (!m) return null;
+    const year = termStart ? termStart.getFullYear() : new Date().getFullYear();
+    return `${year}-${pad2(m[1])}-${pad2(m[2])}`;
+  }
+
+  function findRows() {
+    return Array.from(document.querySelectorAll("tbody tr")).filter((tr) =>
+      tr.querySelector(START_SELECTOR)
+    );
+  }
+
+  // React 管理の input は value 直接代入だと state に反映されないため native setter 経由で設定する
+  const nativeValueSetter = Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    "value"
+  ).set;
+
+  function setInputValue(input, value) {
+    nativeValueSetter.call(input, value);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    input.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
+    input.dispatchEvent(new FocusEvent("blur"));
+  }
+
+  function guessYmFromRows(rows, termStart) {
     for (const tr of rows) {
-      const dateStr = extractDateStrFromRow(tr);
+      const dateStr = extractDateStrFromRow(tr, termStart);
       if (dateStr) return dateStr.slice(0, 7);
     }
     return null;
@@ -55,8 +97,8 @@
 
   function isHolidayOrWeekend(dateStr, holidayMap) {
     if (!dateStr) return { isWeekend: false, isWeekdayHoliday: false };
-    const d = new Date(dateStr);
-    const day = d.getDay();
+    const [y, mo, dd] = dateStr.split("-").map(Number);
+    const day = new Date(y, mo - 1, dd).getDay();
     const isWeekend = day === 0 || day === 6;
 
     if (isWeekend) {
@@ -75,10 +117,7 @@
   const filled = (el) => el && el.value && el.value.trim().length > 0;
 
   async function fillAll(force = false) {
-    const rows = Array.from(document.querySelectorAll("table tr")).filter(
-      (tr) =>
-        tr.querySelector('input[ref="start_time"],input[name*="[start_time]"]')
-    );
+    const rows = findRows();
 
     if (rows.length === 0) {
       console.log("[worktime-autofill] 対象行が見つかりませんでした。");
@@ -92,7 +131,8 @@
       return;
     }
 
-    const ym = guessYmFromRows(rows);
+    const termStart = getTermStart();
+    const ym = guessYmFromRows(rows, termStart);
     if (ym) {
       let cnt = 0;
       for (const d of holidayMap.keys()) {
@@ -106,36 +146,34 @@
     let count = 0;
 
     rows.forEach((tr) => {
-      const dateStr = extractDateStrFromRow(tr);
+      const dateStr = extractDateStrFromRow(tr, termStart);
       const stat = isHolidayOrWeekend(dateStr, holidayMap);
 
       if (stat.isWeekend) return;
 
-      const workInput = tr.querySelector(WORK_CONTENT_SELECTOR);
+      const index = getRowIndex(tr);
+      const field = (key) =>
+        tr.querySelector(`input[name="rows.${index}.${key}"]`);
+
+      const workInput = field("comment");
       if (workInput && workInput.value && workInput.value.includes("休暇")) {
         return;
       }
 
       if (stat.isWeekdayHoliday) {
-        if (workInput) {
-          workInput.value = `祝日_${stat.holidayName}`;
-          workInput.dispatchEvent(new Event("input", { bubbles: true }));
-          workInput.dispatchEvent(new Event("change", { bubbles: true }));
-          workInput.dispatchEvent(new Event("blur", { bubbles: true }));
-        }
+        if (workInput) setInputValue(workInput, `祝日_${stat.holidayName}`);
         return;
       }
 
-      const startInput = tr.querySelector(
-        'input[ref="start_time"], input[name*="[start_time]"]'
-      );
-      const endInput = tr.querySelector(
-        'input[ref="end_time"],   input[name*="[end_time]"]'
-      );
-      const breakInput = tr.querySelector(
-        'input[ref="relax_time"], input[name*="[relax_time]"]'
-      );
+      const startInput = field("startTime");
+      const endInput = field("endTime");
+      const breakInput = field("breakTime");
       if (!startInput || !endInput || !breakInput) return;
+
+      // 作業内容は入力必須のため、空欄なら時刻の入力有無に関わらず既定値を入れる (上書きはしない)
+      if (workInput && !filled(workInput) && currentConfig.standardComment) {
+        setInputValue(workInput, currentConfig.standardComment);
+      }
 
       if (
         !force &&
@@ -143,27 +181,9 @@
       )
         return;
 
-      startInput.value = currentConfig.standardStart;
-      endInput.value = currentConfig.standardEnd;
-      breakInput.value = currentConfig.standardBreak;
-
-      try {
-        const datetime =
-          startInput.getAttribute("datetime") ||
-          endInput.getAttribute("datetime");
-
-        if (typeof reflect_times === "function" && datetime) {
-          reflect_times($(startInput));
-          reflect_times($(endInput));
-          reflect_times($(breakInput));
-        } else {
-          [startInput, endInput, breakInput].forEach((i) => {
-            i.dispatchEvent(new Event("input", { bubbles: true }));
-            i.dispatchEvent(new Event("change", { bubbles: true }));
-            i.dispatchEvent(new Event("blur", { bubbles: true }));
-          });
-        }
-      } catch {}
+      setInputValue(startInput, currentConfig.standardStart);
+      setInputValue(endInput, currentConfig.standardEnd);
+      setInputValue(breakInput, currentConfig.standardBreak);
 
       count++;
     });
@@ -544,17 +564,20 @@
 
     if (!currentConfig.autoOnLoad) return;
 
-    const ready = () =>
-      document.readyState === "interactive" ||
-      document.readyState === "complete";
-    if (ready()) {
-      runWithFeedback(false);
-    } else {
-      document.addEventListener(
-        "readystatechange",
-        () => ready() && runWithFeedback(false)
-      );
-    }
+    waitForRows().then((found) => found && runWithFeedback(false));
+  }
+
+  // Next.js の描画・hydration 完了前に値を入れると React state に反映されないため、行の出現 + 少し待ってから実行する
+  function waitForRows(timeoutMs = 10000, settleMs = 800) {
+    return new Promise((resolve) => {
+      const started = Date.now();
+      const tick = () => {
+        if (findRows().length > 0) return setTimeout(() => resolve(true), settleMs);
+        if (Date.now() - started > timeoutMs) return resolve(false);
+        setTimeout(tick, 200);
+      };
+      tick();
+    });
   }
 
   window.addEventListener("message", (event) => {
